@@ -202,11 +202,7 @@ ClarityAI-server/
 查看 `.env` 中的 `DAILY_TOKEN_LIMIT` 配置，设置为 `0` 可禁用限额。
 
 
-## 📄 开源协议
-
-GPL v3
+## 📄 开源协议： GPL v3
 
 ## 👨‍💻 作者
-
 Royan([Royan·小站](https://www.ycxhl.top))
-
