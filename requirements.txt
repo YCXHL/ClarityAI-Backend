@@ -1,0 +1,8 @@
+Flask==3.0.3
+flask-cors==5.0.0
+openai==1.57.4
+python-dotenv==1.0.1
+fpdf2==2.7.9
+tiktoken==0.8.0
+PyMuPDF==1.24.14
+reportlab==4.2.5
