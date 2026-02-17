@@ -29,18 +29,18 @@ ClarityAI 是一个智能需求对齐工具，通过多轮交互式对话帮助�
 ### 1. 克隆项目
 
 ```bash
-git clone <repository-url>
-cd ClarityAI-server
+git clone https://github.com/YCXHL/ClarityAI-Backend.git
+cd ClarityAI-Backend
 ```
 
 ### 2. 创建虚拟环境（推荐）
 
 ```bash
-python -m venv venv
+python -m venv .
 # Windows
-venv\Scripts\activate
+Scripts\activate
 # Linux/Mac
-source venv/bin/activate
+source bin/activate
 ```
 
 ### 3. 安装依赖
@@ -50,12 +50,6 @@ pip install -r requirements.txt
 ```
 
 ### 4. 配置环境变量
-
-复制 `.env.example` 为 `.env` 并修改配置：
-
-```bash
-cp .env.example .env
-```
 
 编辑 `.env` 文件：
 
@@ -178,69 +172,41 @@ DELETE /api/session/<session_id>
 ```
 ClarityAI-server/
 ├── app/
-│   ├── __init__.py          # 应用工厂
+│   ├── __init__.py
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── session.py       # 会话管理模型
+│   │   └── session.py
 │   ├── routes/
 │   │   ├── __init__.py
-│   │   └── main.py          # 主要路由
+│   │   └── main.py
 │   └── utils/
 │       ├── __init__.py
-│       ├── qwen_api.py      # Qwen API 集成
-│       ├── pdf_generator.py # PDF 生成工具
-│       ├── markdown_generator.py # Markdown 生成工具
-│       └── token_limit.py   # Token 限额检查
-├── output/                   # 生成的文档目录
-├── clarity_ai.db            # SQLite 数据库
-├── .env                     # 环境变量配置
-├── .env.example             # 环境变量示例
-├── requirements.txt         # Python 依赖
-└── run.py                   # 启动脚本
+│       ├── qwen_api.py
+│       ├── pdf_generator.py
+│       ├── markdown_generator.py
+│       └── token_limit.py
+├── output/
+├── clarity_ai.db
+├── .env
+├── requirements.txt
+└── run.py  # 启动脚本
 ```
 
-## 🔐 安全性
 
-- API 密钥存储在服务器端 `.env` 文件中
-- 使用 Flask 的 `SECRET_KEY` 进行会话加密
-- CORS 配置限制跨域访问
-- Token 限额防止滥用
-
-## 🐛 常见问题
+## 常见问题
 
 ### 1. 无法连接到 Qwen API
 检查 `.env` 文件中的 `QWEN_API_KEY` 是否正确配置。
 
-### 2. PDF 生成失败
-确保系统安装了中文字体（如 SimHei、Microsoft YaHei）。
-
-### 3. Token 限额生效
+### 2. Token 限额生效
 查看 `.env` 中的 `DAILY_TOKEN_LIMIT` 配置，设置为 `0` 可禁用限额。
 
-## 📝 更新日志
 
-### v1.0.0
-- ✨ 初始版本发布
-- 🤖 Qwen AI 集成
-- 📊 需求分析报告生成
-- 📄 Markdown 文档导出
-- 💾 会话管理
-- 🔒 Token 限额控制
+## 📄 开源协议
 
-## 📄 许可证
-
-MIT License
-
-## 🔗 相关链接
-
-- [前端项目](https://github.com/your-username/clarityai-web)
-- [Qwen API 文档](https://help.aliyun.com/zh/dashscope/)
-- [Flask 文档](https://flask.palletsprojects.com/)
+GPL v3
 
 ## 👨‍💻 作者
 
-Royan
+Royan([Royan·小站](https://www.ycxhl.top))
 
-## 🙏 致谢
-
-感谢使用 ClarityAI！
