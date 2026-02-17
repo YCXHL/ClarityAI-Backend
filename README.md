@@ -2,6 +2,8 @@
 
 AI 驱动的需求对齐工具 - 后端服务
 
+[前端仓库](https://github.com/YCXHL/ClarityAI-Frontend)
+
 ## 📖 项目简介
 
 ClarityAI 是一个智能需求对齐工具，通过多轮交互式对话帮助用户从模糊的初步想法逐步明确为结构化项目需求。后端采用 Python Flask 框架，集成 Qwen AI API 提供智能问答和需求分析能力。
