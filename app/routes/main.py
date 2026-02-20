@@ -19,9 +19,9 @@ def api_generate_questions():
     try:
         data = request.get_json()
         idea = data.get('idea', '')
-        
+
         # 获取自定义 API 配置
-        custom_config = data.get('custom_api', {})
+        custom_config = data.get('custom_api') or {}
         custom_api_key = custom_config.get('api_key')
         custom_base_url = custom_config.get('base_url')
         custom_model = custom_config.get('model')
@@ -33,8 +33,8 @@ def api_generate_questions():
         session_id = SessionManager.create_session(idea)
 
         # 调用 Qwen API 生成问题
-        questions = generate_questions(idea, custom_api_key=custom_api_key, 
-                                      custom_base_url=custom_base_url, 
+        questions = generate_questions(idea, custom_api_key=custom_api_key,
+                                      custom_base_url=custom_base_url,
                                       custom_model=custom_model)
 
         # 保存问题到会话
@@ -58,9 +58,9 @@ def api_submit_answers():
         data = request.get_json()
         session_id = data.get('session_id', '')
         answers = data.get('answers', [])
-        
+
         # 获取自定义 API 配置
-        custom_config = data.get('custom_api', {})
+        custom_config = data.get('custom_api') or {}
         custom_api_key = custom_config.get('api_key')
         custom_base_url = custom_config.get('base_url')
         custom_model = custom_config.get('model')
@@ -154,9 +154,9 @@ def api_continue_with_feedback():
         data = request.get_json()
         session_id = data.get('session_id', '')
         feedback = data.get('feedback', '')
-        
+
         # 获取自定义 API 配置
-        custom_config = data.get('custom_api', {})
+        custom_config = data.get('custom_api') or {}
         custom_api_key = custom_config.get('api_key')
         custom_base_url = custom_config.get('base_url')
         custom_model = custom_config.get('model')
@@ -170,7 +170,7 @@ def api_continue_with_feedback():
             return jsonify({'error': '无效的会话 ID'}), 400
 
         # 基于原始想法、已有问答和用户反馈生成新问题
-        new_questions = generate_questions(session_data['idea'], session_data['questions'], 
+        new_questions = generate_questions(session_data['idea'], session_data['questions'],
                                           session_data['answers'], feedback,
                                           custom_api_key=custom_api_key,
                                           custom_base_url=custom_base_url,

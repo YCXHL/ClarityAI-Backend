@@ -33,6 +33,9 @@ def generate_questions(idea, questions_list=None, answers_list=None, feedback=No
     # 获取模型
     model = custom_model or os.getenv("QWEN_MODEL", "qwen-max")
     
+    # 标记是否使用自定义 API 配置
+    is_custom_api = bool(custom_api_key)
+    
     # 构建提示词 - 检查是否有问答历史
     has_qa_history = questions_list and len(questions_list) > 0 and feedback
     
@@ -108,8 +111,8 @@ def generate_questions(idea, questions_list=None, answers_list=None, feedback=No
             max_tokens=1000
         )
         
-        # 记录 token 使用量
-        if hasattr(response, 'usage') and response.usage:
+        # 记录 token 使用量（仅当使用服务端默认 API 配置时）
+        if not is_custom_api and hasattr(response, 'usage') and response.usage:
             from app.models.session import SessionManager
             total_tokens = response.usage.total_tokens
             SessionManager.add_token_usage(total_tokens)
@@ -161,6 +164,9 @@ def process_answers_to_doc(idea, questions, answers, custom_api_key=None, custom
     # 获取模型
     model = custom_model or os.getenv("QWEN_MODEL", "qwen-max")
     
+    # 标记是否使用自定义 API 配置
+    is_custom_api = bool(custom_api_key)
+    
     # 创建问题和答案的映射
     qa_pairs = []
     for i, answer in enumerate(answers):
@@ -200,8 +206,8 @@ def process_answers_to_doc(idea, questions, answers, custom_api_key=None, custom
             max_tokens=1500
         )
         
-        # 记录 token 使用量
-        if hasattr(response, 'usage') and response.usage:
+        # 记录 token 使用量（仅当使用服务端默认 API 配置时）
+        if not is_custom_api and hasattr(response, 'usage') and response.usage:
             from app.models.session import SessionManager
             total_tokens = response.usage.total_tokens
             SessionManager.add_token_usage(total_tokens)
