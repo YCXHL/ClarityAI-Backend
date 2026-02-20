@@ -5,17 +5,34 @@ from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 
-# 创建 OpenAI 客户端（这里使用 Qwen API 兼容的格式）
-client = OpenAI(
+# 创建默认 OpenAI 客户端（这里使用 Qwen API 兼容的格式）
+default_client = OpenAI(
     api_key=os.getenv("QWEN_API_KEY") or os.getenv("OPENAI_API_KEY"),
     base_url=os.getenv("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 )
 
 
-def generate_questions(idea, questions_list=None, answers_list=None, feedback=None):
+def get_client(custom_api_key=None, custom_base_url=None):
+    """获取 API 客户端，支持自定义配置"""
+    if custom_api_key:
+        return OpenAI(
+            api_key=custom_api_key,
+            base_url=custom_base_url or os.getenv("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+        )
+    return default_client
+
+
+def generate_questions(idea, questions_list=None, answers_list=None, feedback=None, 
+                      custom_api_key=None, custom_base_url=None, custom_model=None):
     """
     使用 Qwen API 根据用户想法、已有问答和反馈生成问题
     """
+    # 获取客户端
+    client = get_client(custom_api_key, custom_base_url)
+    
+    # 获取模型
+    model = custom_model or os.getenv("QWEN_MODEL", "qwen-max")
+    
     # 构建提示词 - 检查是否有问答历史
     has_qa_history = questions_list and len(questions_list) > 0 and feedback
     
@@ -80,7 +97,7 @@ def generate_questions(idea, questions_list=None, answers_list=None, feedback=No
     
     try:
         response = client.chat.completions.create(
-            model=os.getenv("QWEN_MODEL", "qwen-max"),
+            model=model,
             messages=[
                 {
                     "role": "user",
@@ -134,10 +151,16 @@ def generate_questions(idea, questions_list=None, answers_list=None, feedback=No
         ]
 
 
-def process_answers_to_doc(idea, questions, answers):
+def process_answers_to_doc(idea, questions, answers, custom_api_key=None, custom_base_url=None, custom_model=None):
     """
     处理用户答案并生成阶段性报告
     """
+    # 获取客户端
+    client = get_client(custom_api_key, custom_base_url)
+    
+    # 获取模型
+    model = custom_model or os.getenv("QWEN_MODEL", "qwen-max")
+    
     # 创建问题和答案的映射
     qa_pairs = []
     for i, answer in enumerate(answers):
@@ -166,7 +189,7 @@ def process_answers_to_doc(idea, questions, answers):
 
     try:
         response = client.chat.completions.create(
-            model=os.getenv("QWEN_MODEL", "qwen-max"),
+            model=model,
             messages=[
                 {
                     "role": "user",

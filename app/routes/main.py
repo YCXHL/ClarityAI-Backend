@@ -19,6 +19,12 @@ def api_generate_questions():
     try:
         data = request.get_json()
         idea = data.get('idea', '')
+        
+        # 获取自定义 API 配置
+        custom_config = data.get('custom_api', {})
+        custom_api_key = custom_config.get('api_key')
+        custom_base_url = custom_config.get('base_url')
+        custom_model = custom_config.get('model')
 
         if not idea:
             return jsonify({'error': '想法不能为空'}), 400
@@ -27,7 +33,9 @@ def api_generate_questions():
         session_id = SessionManager.create_session(idea)
 
         # 调用 Qwen API 生成问题
-        questions = generate_questions(idea)
+        questions = generate_questions(idea, custom_api_key=custom_api_key, 
+                                      custom_base_url=custom_base_url, 
+                                      custom_model=custom_model)
 
         # 保存问题到会话
         SessionManager.save_questions(session_id, questions)
@@ -50,6 +58,12 @@ def api_submit_answers():
         data = request.get_json()
         session_id = data.get('session_id', '')
         answers = data.get('answers', [])
+        
+        # 获取自定义 API 配置
+        custom_config = data.get('custom_api', {})
+        custom_api_key = custom_config.get('api_key')
+        custom_base_url = custom_config.get('base_url')
+        custom_model = custom_config.get('model')
 
         if not session_id or not answers:
             return jsonify({'error': '会话 ID 和答案不能为空'}), 400
@@ -64,7 +78,10 @@ def api_submit_answers():
         all_answers = session_data['answers'] + answers  # 合并历史答案和新答案
 
         # 生成阶段性报告（基于所有历史问答）
-        report = process_answers_to_doc(session_data['idea'], all_questions, all_answers)
+        report = process_answers_to_doc(session_data['idea'], all_questions, all_answers,
+                                       custom_api_key=custom_api_key,
+                                       custom_base_url=custom_base_url,
+                                       custom_model=custom_model)
 
         # 更新会话数据
         SessionManager.update_session_with_answers(session_id, answers, report)
@@ -137,6 +154,12 @@ def api_continue_with_feedback():
         data = request.get_json()
         session_id = data.get('session_id', '')
         feedback = data.get('feedback', '')
+        
+        # 获取自定义 API 配置
+        custom_config = data.get('custom_api', {})
+        custom_api_key = custom_config.get('api_key')
+        custom_base_url = custom_config.get('base_url')
+        custom_model = custom_config.get('model')
 
         if not session_id or not feedback:
             return jsonify({'error': '会话 ID 和反馈不能为空'}), 400
@@ -147,7 +170,11 @@ def api_continue_with_feedback():
             return jsonify({'error': '无效的会话 ID'}), 400
 
         # 基于原始想法、已有问答和用户反馈生成新问题
-        new_questions = generate_questions(session_data['idea'], session_data['questions'], session_data['answers'], feedback)
+        new_questions = generate_questions(session_data['idea'], session_data['questions'], 
+                                          session_data['answers'], feedback,
+                                          custom_api_key=custom_api_key,
+                                          custom_base_url=custom_base_url,
+                                          custom_model=custom_model)
 
         # 替换会话中的问题（而不是追加）
         SessionManager.replace_questions(session_id, new_questions)
