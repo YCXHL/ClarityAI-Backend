@@ -144,6 +144,28 @@ def api_get_session_data(session_id):
         return jsonify({'error': str(e)}), 500
 
 
+@bp.route('/api/session/<session_id>/rounds', methods=['GET'])
+def api_get_session_rounds(session_id):
+    """
+    获取会话的轮次数据（保持问答对应关系）
+    """
+    try:
+        # 获取会话信息
+        session_data = SessionManager.get_session(session_id)
+        if not session_data:
+            return jsonify({'error': '无效的会话 ID'}), 404
+
+        # 获取轮次数据
+        rounds = SessionManager.get_rounds(session_id)
+
+        return jsonify({
+            'session_id': session_id,
+            'rounds': rounds
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @bp.route('/api/continue-with-feedback', methods=['POST'])
 @check_token_limit
 def api_continue_with_feedback():

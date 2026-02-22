@@ -29,6 +29,21 @@ class SessionManager:
             )
         """)
         
+        # 创建轮次表，用于存储每轮的问答对应关系
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS rounds (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT NOT NULL,
+                round_number INTEGER NOT NULL,
+                questions TEXT NOT NULL,
+                answers TEXT NOT NULL,
+                report TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE,
+                UNIQUE (session_id, round_number)
+            )
+        """)
+        
         conn.commit()
         conn.close()
     
@@ -125,6 +140,26 @@ class SessionManager:
                 SET answers = ?, reports = ?, updated_at = ?
                 WHERE id = ?
             """, (answers_json, reports_json, updated_at, session_id))
+            
+            # 获取当前轮次号
+            cursor.execute("SELECT MAX(round_number) FROM rounds WHERE session_id = ?", (session_id,))
+            max_round = cursor.fetchone()[0]
+            next_round = (max_round or 0) + 1
+            
+            # 获取当前问题
+            cursor.execute("SELECT questions FROM sessions WHERE id = ?", (session_id,))
+            current_questions = json.loads(cursor.fetchone()[0])
+            
+            # 保存轮次数据（保持问答对应关系）
+            # 注意：answers 参数是当前轮次的答案，不是累积的
+            created_at = datetime.now().isoformat()
+            cursor.execute("""
+                INSERT OR REPLACE INTO rounds (session_id, round_number, questions, answers, report, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (session_id, next_round, 
+                  json.dumps(current_questions), 
+                  json.dumps(answers),  # 使用当前轮次的答案，而不是累积答案
+                  report, created_at))
             
             conn.commit()
         conn.close()
@@ -249,6 +284,34 @@ class SessionManager:
 
         conn.commit()
         conn.close()
+
+    @classmethod
+    def get_rounds(cls, session_id):
+        """获取所有轮次的数据（保持问答对应关系）"""
+        conn = sqlite3.connect(cls.DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT round_number, questions, answers, report, created_at 
+            FROM rounds 
+            WHERE session_id = ? 
+            ORDER BY round_number ASC
+        """, (session_id,))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        rounds = []
+        for row in rows:
+            rounds.append({
+                'round_number': row[0],
+                'questions': json.loads(row[1]),
+                'answers': json.loads(row[2]),
+                'report': row[3],
+                'created_at': row[4]
+            })
+        
+        return rounds
 
     @classmethod
     def generate_pdf_report(cls, session_id):
